@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Graphs;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -107,6 +106,8 @@ public class Graph
     public static final double INFINITY = Double.MAX_VALUE;
     private Map<String,Vertex> vertexMap = new HashMap<String,Vertex>( );
 
+    public static boolean solution;
+
     /**
      * Add a new edge to the graph.
      */
@@ -141,7 +142,7 @@ public class Graph
      * If vertexName is not present, add it to vertexMap.
      * In either case, return the Vertex.
      */
-    private Vertex getVertex( String vertexName )
+    public Vertex getVertex( String vertexName )
     {
         Vertex v = vertexMap.get( vertexName );
         if( v == null )
@@ -149,6 +150,7 @@ public class Graph
             v = new Vertex( vertexName );
             vertexMap.put( vertexName, v );
         }
+
         return v;
     }
 
@@ -157,14 +159,15 @@ public class Graph
      * after running shortest path algorithm. The path
      * is known to exist.
      */
-    private void printPath( Vertex dest )
+    public String printPath( Vertex dest )
     {
-        if( dest.prev != null )
+        if(!solution){
+            if(dest.prev == null){ return dest.name;}
+            return printPath(dest.prev) + " " + dest.name;}
+        else
         {
-            printPath( dest.prev );
-            System.out.print( " to " );
+           return "Multiple paths cost " + dest.dist;
         }
-        System.out.print( dest.name );
     }
     
     /**
@@ -214,6 +217,7 @@ public class Graph
      */
     public void dijkstra( String startName )
     {
+
         PriorityQueue<Path> pq = new PriorityQueue<Path>( );
 
         Vertex start = vertexMap.get( startName );
@@ -222,7 +226,7 @@ public class Graph
 
         clearAll( );
         pq.add( new Path( start, 0 ) ); start.dist = 0;
-        
+
         int nodesSeen = 0;
         while( !pq.isEmpty( ) && nodesSeen < vertexMap.size( ) )
         {
@@ -244,6 +248,14 @@ public class Graph
                     
                 if( w.dist > v.dist + cvw )
                 {
+                    solution = false;
+                    w.dist = v.dist +cvw;
+                    w.prev = v;
+                    pq.add( new Path( w, w.dist ) );
+                }
+                if(w.dist == v.dist + cvw ){
+
+                    solution = true;
                     w.dist = v.dist +cvw;
                     w.prev = v;
                     pq.add( new Path( w, w.dist ) );
